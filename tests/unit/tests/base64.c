@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <setjmp.h>
+#include <string.h>
 #include <cmocka.h>
 
 extern uint8_t base64_encode_64bytes(const uint8_t* src, char* dst);
@@ -21,13 +22,25 @@ const char* encoded_string =
     "dKLoepugzdVJvdL56ogNVUxsNVsI7SUIjPqI8/HE90YytlL9So9f2kMHTG9pZKN1Owi7UhDI9edcB6TCogv26Q==";
 
 static void test_base64(void **state) {
+    (void) state;
+
     char result[88] = {0};
     uint8_t return_num;
 
-    return_num = base64_encode_64bytes(base64_input, result);
+    // base64_encode_64bytes() must read exactly the 64 bytes it is given.
+    // Copy the input into a larger buffer whose trailing bytes are non-zero, so
+    // that any read past the 64-byte boundary changes the output rather than
+    // matching the expected string by luck.
+    uint8_t guarded_input[sizeof(base64_input) + 2];
+    memcpy(guarded_input, base64_input, sizeof(base64_input));
+    guarded_input[sizeof(base64_input)] = 0xA5;
+    guarded_input[sizeof(base64_input) + 1] = 0x5A;
+
+    return_num = base64_encode_64bytes(guarded_input, result);
 
     assert_int_equal(return_num, 88);
-    assert_memory_equal(result, encoded_string, sizeof(encoded_string));
+    // encoded_string is a pointer: sizeof() would compare only 8 bytes.
+    assert_memory_equal(result, encoded_string, strlen(encoded_string));
 }
 
 int main(void) {

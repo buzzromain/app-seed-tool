@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <setjmp.h>
+#include <string.h>
 #include <cmocka.h>
 
 extern uint8_t base85_encode_64bytes(const uint8_t* src, char* dst);
@@ -21,13 +22,24 @@ const char* encoded_string =
     "_s`{TW89)i4`uwnp5{Hxh0%|78*5%18;3KmWLe1sr(S}zqAvgWx#peX6iX>OsBuFXpj5WYRf1}cQ9@D)";
 
 static void test_base85(void **state) {
+    (void) state;
+
     char result[80] = {0};
     uint8_t return_num;
 
-    return_num = base85_encode_64bytes(base85_input, result);
+    // Same guard as the Base64 test: 64 is a multiple of 4, so this encoder is
+    // expected to stay within bounds. The non-zero trailing bytes make that a
+    // tested property rather than an assumption.
+    uint8_t guarded_input[sizeof(base85_input) + 2];
+    memcpy(guarded_input, base85_input, sizeof(base85_input));
+    guarded_input[sizeof(base85_input)] = 0xA5;
+    guarded_input[sizeof(base85_input) + 1] = 0x5A;
+
+    return_num = base85_encode_64bytes(guarded_input, result);
 
     assert_int_equal(return_num, 80);
-    assert_memory_equal(result, encoded_string, sizeof(encoded_string));
+    // encoded_string is a pointer: sizeof() would compare only 8 bytes.
+    assert_memory_equal(result, encoded_string, strlen(encoded_string));
 }
 
 int main(void) {

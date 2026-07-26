@@ -84,11 +84,11 @@ unsigned int bolos_ux_sskr_combine(unsigned char *sskr_shares_hex,
                              4 + (sskr_share_len > 23);
     }
 
-    uint16_t output_len = sskr_combine_shards(ptr_sskr_shares,
-                                              sskr_share_len,
-                                              (uint8_t) sskr_shares_count,
-                                              output,
-                                              SSKR_MAX_STRENGTH_BYTES);
+    int16_t output_len = sskr_combine_shards(ptr_sskr_shares,
+                                             sskr_share_len,
+                                             (uint8_t) sskr_shares_count,
+                                             output,
+                                             SSKR_MAX_STRENGTH_BYTES);
 
     if (output_len < 1) {
         memzero(sskr_shares_hex, sskr_shares_hex_length);

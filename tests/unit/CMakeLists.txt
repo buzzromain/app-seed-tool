@@ -188,6 +188,10 @@ add_executable(test_sskr_share_len ./tests/sskr_share_len.c ../../src/common/bip
 target_include_directories(test_sskr_share_len PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../../src/common)
 target_link_libraries(test_sskr_share_len PUBLIC cmocka gcov sskr sss testutils)
 
+add_executable(test_sskr_memzero ./tests/sskr_memzero.c ../../src/common/bip39/seed_rom_variables.c ../../src/common/bip39/seed_bip39.c ../../src/common/sskr/seed_rom_variables.c ../../src/common/sskr/seed_sskr.c)
+target_include_directories(test_sskr_memzero PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../../src/common)
+target_link_libraries(test_sskr_memzero PUBLIC cmocka gcov sskr sss testutils)
+
 add_executable(test_bip39 ./tests/bip39.c ../../src/common/bip39/seed_rom_variables.c  ../../src/common/bip39/seed_bip39.c)
 target_include_directories(test_bip39 PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../../src/common)
 target_link_libraries(test_bip39 PUBLIC cmocka gcov testutils)
@@ -200,6 +204,6 @@ add_executable(test_words ./tests/words.c ../../src/common/bip39/seed_rom_variab
 target_include_directories(test_words PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../../src/common)
 target_link_libraries(test_words PUBLIC cmocka gcov testutils sskr sss)
 
-foreach(target test_sss test_sskr test_sskr_group_count test_bip39 test_roundtrip test_words test_sskr_shard_count test_sskr_combine_bounds test_sskr_share_len)
+foreach(target test_sss test_sskr test_sskr_group_count test_bip39 test_roundtrip test_words test_sskr_shard_count test_sskr_combine_bounds test_sskr_share_len test_sskr_memzero)
     add_test(NAME ${target} COMMAND ${target})
 endforeach()

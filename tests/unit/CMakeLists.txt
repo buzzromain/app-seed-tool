@@ -173,6 +173,17 @@ target_link_libraries(test_sskr PUBLIC cmocka gcov testutils sskr sss)
 add_executable(test_sskr_group_count tests/sskr_group_count.c)
 target_link_libraries(test_sskr_group_count PUBLIC cmocka gcov sskr sss testutils)
 
+add_executable(test_sskr_shard_count tests/sskr_shard_count.c)
+target_link_libraries(test_sskr_shard_count PUBLIC cmocka gcov sskr sss testutils)
+
+# Built with AddressSanitizer: this one is about what the code writes, not
+# what it returns, so the sanitizer is the assertion.
+add_executable(test_sskr_combine_bounds ./tests/sskr_combine_bounds.c ../../src/common/bip39/seed_rom_variables.c ../../src/common/bip39/seed_bip39.c ../../src/common/sskr/seed_rom_variables.c ../../src/common/sskr/seed_sskr.c)
+target_include_directories(test_sskr_combine_bounds PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../../src ${CMAKE_CURRENT_SOURCE_DIR}/../../src/common ${CMAKE_CURRENT_SOURCE_DIR}/../../src/common/sskr/sss)
+target_compile_options(test_sskr_combine_bounds PRIVATE -fsanitize=address -fno-omit-frame-pointer)
+target_link_options(test_sskr_combine_bounds PRIVATE -fsanitize=address)
+target_link_libraries(test_sskr_combine_bounds PUBLIC cmocka gcov testutils sskr sss)
+
 add_executable(test_bip39 ./tests/bip39.c ../../src/common/bip39/seed_rom_variables.c  ../../src/common/bip39/seed_bip39.c)
 target_include_directories(test_bip39 PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../../src/common)
 target_link_libraries(test_bip39 PUBLIC cmocka gcov testutils)
@@ -185,6 +196,6 @@ add_executable(test_words ./tests/words.c ../../src/common/bip39/seed_rom_variab
 target_include_directories(test_words PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../../src/common)
 target_link_libraries(test_words PUBLIC cmocka gcov testutils sskr sss)
 
-foreach(target test_sss test_sskr test_sskr_group_count test_bip39 test_roundtrip test_words)
+foreach(target test_sss test_sskr test_sskr_group_count test_bip39 test_roundtrip test_words test_sskr_shard_count test_sskr_combine_bounds)
     add_test(NAME ${target} COMMAND ${target})
 endforeach()

@@ -178,10 +178,15 @@ add_executable(test_roundtrip ./tests/roundtrip.c ../../src/common/bip39/seed_ro
 target_include_directories(test_roundtrip PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../../src ${CMAKE_CURRENT_SOURCE_DIR}/../../src/common)
 target_link_libraries(test_roundtrip PUBLIC cmocka gcov testutils sskr sss)
 
+add_executable(test_sskr_entry_bounds ./tests/sskr_entry_bounds.c ../../src/common/bip39/seed_rom_variables.c ../../src/common/bip39/seed_bip39.c ../../src/common/sskr/seed_rom_variables.c ../../src/common/sskr/seed_sskr.c ../../src/nbgl/sskr_shares.c)
+target_compile_definitions(test_sskr_entry_bounds PRIVATE SCREEN_SIZE_WALLET)
+target_include_directories(test_sskr_entry_bounds PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../../src/common ${CMAKE_CURRENT_SOURCE_DIR}/../../src)
+target_link_libraries(test_sskr_entry_bounds PUBLIC cmocka gcov sskr sss testutils)
+
 add_executable(test_words ./tests/words.c ../../src/common/bip39/seed_rom_variables.c ../../src/common/bip39/seed_bip39.c ../../src/common/sskr/seed_rom_variables.c ../../src/common/sskr/seed_sskr.c)
 target_include_directories(test_words PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../../src/common)
 target_link_libraries(test_words PUBLIC cmocka gcov testutils sskr sss)
 
-foreach(target test_sss test_sskr test_bip39 test_roundtrip test_words)
+foreach(target test_sskr_entry_bounds test_sss test_sskr test_bip39 test_roundtrip test_words)
     add_test(NAME ${target} COMMAND ${target})
 endforeach()

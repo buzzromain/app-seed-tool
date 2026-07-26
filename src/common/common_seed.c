@@ -26,9 +26,11 @@
 extern unsigned int onboarding_type;
 #endif
 
-bool compare_recovery_phrase(void) {
+bool compare_recovery_phrase(bool* reconstructed) {
     // convert mnemonic to hex-seed
     uint8_t buffer[64];
+
+    *reconstructed = true;
 
 #if defined(HAVE_BAGL)
     if (G_bolos_ux_context.onboarding_type == ONBOARDING_TYPE_BIP39) {
@@ -43,14 +45,23 @@ bool compare_recovery_phrase(void) {
                                       (unsigned char*) &G_bolos_ux_context.words_buffer,
                                       &G_bolos_ux_context.words_buffer_length,
                                       buffer);
+        if (G_bolos_ux_context.words_buffer_length == 0) {
+            // shards accepted by the CRC check but not combinable
+            *reconstructed = false;
+            return false;
+        }
     }
 #elif defined(HAVE_NBGL)
     if (onboarding_type == ONBOARDING_TYPE_BIP39) {
-        bolos_ux_bip39_mnemonic_to_seed((const unsigned char *) bip39_mnemonic_get(),
+        bolos_ux_bip39_mnemonic_to_seed((const unsigned char*) bip39_mnemonic_get(),
                                         bip39_mnemonic_length_get(),
                                         buffer);
     } else if (onboarding_type == ONBOARDING_TYPE_SSKR) {
-        bip39_mnemonic_from_sskr_shares(buffer);
+        if (!bip39_mnemonic_from_sskr_shares(buffer)) {
+            // shards accepted by the CRC check but not combinable
+            *reconstructed = false;
+            return false;
+        }
     }
 #endif
     PRINTF("Input seed:\n %.*H\n", 64, buffer);
